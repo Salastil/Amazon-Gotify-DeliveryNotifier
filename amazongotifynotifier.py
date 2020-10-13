@@ -7,7 +7,7 @@ import subprocess
 
 file = "deliveries.txt" # Path to deliveries.txt
 gotifytoken = "EnterToken" # Enter application token
-gotifyserver = "http://gotify.example.tld" # Example http://gotify.domain.tld or http://ip:port
+gotifyserver = "http://gotify.example.tld" # Enter gotify server url or ip:port
 
 
 params = (

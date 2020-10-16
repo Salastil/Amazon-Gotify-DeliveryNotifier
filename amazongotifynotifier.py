@@ -5,10 +5,12 @@ import sys
 import re
 import subprocess
 
-file = "deliveries.txt" # Path to deliveries.txt
-gotifytoken = "EnterToken" # Enter application token
-gotifyserver = "http://gotify.example.tld" # Enter gotify server url or ip:port
-
+file = "deliveries.txt" # Path to deliveries.txt.
+gotifytoken = "" # Enter application token.
+gotifyserver = "" # Enter gotify server url or ip:port.
+sshserver = "" # Enter user@ip or domain, SSH keys must be configured.
+libnotify = "False"
+sshlibnotify = "False"
 
 params = (
     ('token', f'{gotifytoken}'),
@@ -20,10 +22,19 @@ files = {
     'priority': (None, '5'),
 }
 
-notification=["notify-send", "-u", "critical", "'Package Delivery'", "'Amazon Package Delivered'"]
-outstanding = []
+if libnotify == "True":
+  libnotify=["notify-send", "-u", "critical", "'Package Delivery'", "'Amazon Package Delivered'"] #Uncomment this if notifications via libnotify are desired.
+else:
+  libnotify = None
+if sshlibnotify == "True":
+  sshlibnotify = ["ssh", f"{sshserver}", "-t", "notify-send -u critical \"Package Delivered\" \"Amazon Package Delivered\""] #Uncomment this if notifications using libnotify via ssh are desired.
+else:
+  sshlibnotify = None
 
-#Opens delivery url file and scrapes out the status from each url's page and a loop to search for the keyword "Delivered" and sends a notification to a Gotify server and libnotify
+outstanding = []
+matches = None
+
+#Opens delivery url file and scrapes out the status from each url's page and a loop to search for the keyword "Delivered" and sends a notification to a Gotify server and libnotify.
 with open(file) as deliveries:
     url = deliveries.readlines()
     for line in url:
@@ -35,11 +46,8 @@ with open(file) as deliveries:
       stringsearch = re.compile(r'^Delivered.')
       combined = status + " " + line
       print(combined)
-      matches = stringsearch.finditer(status)
-      for match in matches:
-        response = requests.post(f'{gotifyserver}/message', params=params, files=files)
-#        notify = subprocess.check_output(notification).decode("utf-8").strip() #Uncomment this if notifications via libnotify are desired.
-#Nabbing all urls that aren't delivered and appending it to variable to be written back into url file absent completed orders.
+      matches = stringsearch.finditer(status) 
+      #Nabbing all urls that aren't delivered and appending it to a list to be written back into deliveres.txt file absent completed orders.
       if combined.find("Delivered") != -1:
         pass
       else:
@@ -48,4 +56,16 @@ with open(file) as deliveries:
 with open(file, 'w') as remaining:
   remaining.writelines(outstanding)
 
+if matches:
+    response = requests.post(f'{gotifyserver}/message', params=params, files=files)
+    if libnotify:
+      try: 
+          libnotify = subprocess.check_output(libnotify).decode("utf-8").strip() 
+      except:
+          print("Failed to send notification using libnotify, ensure that libnotify is installed")
+    if sshlibnotify:
+        try: 
+          sshlibnotify = subprocess.Popen(sshlibnotify, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        except:
+          print("Failed to send notification using SSH, ensure that openssh is installed, ssh keys configured, and that libnotify is installed on remote box.")
 

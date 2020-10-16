@@ -9,8 +9,8 @@ file = "deliveries.txt" # Path to deliveries.txt.
 gotifytoken = "" # Enter application token.
 gotifyserver = "" # Enter gotify server url or ip:port.
 sshserver = "" # Enter user@ip or domain, SSH keys must be configured.
-libnotify = "True"
-sshlibnotify = "True"
+libnotify = "False"
+sshlibnotify = "False"
 
 params = (
     ('token', f'{gotifytoken}'),

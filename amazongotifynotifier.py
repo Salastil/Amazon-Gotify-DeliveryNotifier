@@ -9,8 +9,8 @@ file = "deliveries.txt" # Path to deliveries.txt.
 gotifytoken = "" # Enter application token.
 gotifyserver = "" # Enter gotify server url or ip:port.
 sshserver = "" # Enter user@ip or domain, SSH keys must be configured.
-libnotify = "False"
-sshlibnotify = "False"
+libnotify = "True"
+sshlibnotify = "True"
 
 params = (
     ('token', f'{gotifytoken}'),
@@ -45,22 +45,8 @@ with open(file) as deliveries:
       stringsearch = re.compile(r'^Delivered.')
       combined = status + " " + line
       print(combined)
+      global matches
       matches = stringsearch.finditer(status)
-      for match in matches:
-        try:
-          response = requests.post(f'{gotifyserver}/message', params=params, files=files)
-        except:
-        	print("Failed to send notification using Gotify, check token and url configuration")
-        if libnotify:
-          try: 
-           libnotify = subprocess.check_output(libnotify).decode("utf-8").strip() 
-          except:
-            print("Failed to send notification using libnotify, ensure that libnotify is installed")
-        if sshlibnotify:
-          try: 
-           sshlibnotify = subprocess.Popen(sshlibnotify, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-          except:
-           print("Failed to send notification using SSH, ensure that openssh is installed, ssh keys configured, and that libnotify is installed on remote box.")
       #Nabbing all urls that aren't delivered and appending it to a list to be written back into deliveres.txt file absent completed orders.
       if combined.find("Delivered") != -1:
         pass
@@ -69,6 +55,24 @@ with open(file) as deliveries:
 
 with open(file, 'w') as remaining:
   remaining.writelines(outstanding)
+
+for match in matches:
+    try:
+      response = requests.post(f'{gotifyserver}/message', params=params, files=files)
+    except:
+      print("Failed to send notification using Gotify, check token and url configuration")
+    if libnotify:
+      try: 
+        libnotify = subprocess.check_output(libnotify).decode("utf-8").strip() 
+      except:
+        print("Failed to send notification using libnotify, ensure that libnotify is installed")
+    elif sshlibnotify:
+      try: 
+        sshlibnotify = subprocess.Popen(sshlibnotify, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      except:
+        print("Failed to send notification using SSH, ensure that openssh is installed, ssh keys configured, and that libnotify is installed on remote box.")
+
+
 
 
 

@@ -10,9 +10,14 @@ import config
 parser = argparse.ArgumentParser(description="Check the delivery status of Amazon orders")
 parser.add_argument("-a", "--add", type=str, metavar="", required=False, help="Add a package to deliveries.txt")
 parser.add_argument("-t", "--test", action="store_true", help="Test active notification services")
+parser.add_argument("-c", "--clean", action="store_true", help="Clean Deliveries file of all results")
 args = parser.parse_args()
 
 outstanding = []
+
+
+def clean():
+  open(config.file, 'w').close()
 
 def notifications():
     try:
@@ -38,6 +43,8 @@ if __name__ == "__main__":
           deliveries.write(args.add + "\n")
   elif args.test:
     notifications()
+  elif args.clean:
+    clean()
   else:
     #Opens delivery url file and scrapes out the status from each url's page and a loop to search for the keyword "Delivered" and sends a notification to a Gotify server and libnotify.
     with open(config.file) as deliveries:
@@ -61,6 +68,8 @@ if __name__ == "__main__":
     with open(config.file, 'w') as remaining:
        remaining.writelines(outstanding)
     #Notifications   
-    for match in matches:
+    try: 
+      for match in matches:
         notifications()
-      
+    except:
+      print('Malformed urls or empty deliveries file')  

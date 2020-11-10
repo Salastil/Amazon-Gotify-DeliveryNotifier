@@ -28,12 +28,11 @@ Paste in:
 ## Usage
 Add in Gotify application token and url into amazongotifynotifier.py and call it via a timer application such as cron or systemd timers. 
 
+An option to test your notification configuration exists by calling amazongotifynotifier -t
+
 Copy url from the tracking page and run amazongotifynotifier.py -a "urlhere"
 Be mindful of the shell bracing, or not bracing characters, if the url is malformed it will throw an exception. 
 ![trackingpage](https://user-images.githubusercontent.com/46979341/95823925-78a05f00-0cfc-11eb-9e2c-48ac4436d2f2.png)
-
-An option to test your notification configuration exists by calling amazongotifynotifier -t
-
 
 
 

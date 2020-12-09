@@ -61,8 +61,8 @@ if __name__ == "__main__":
        global matches
        matches = stringsearch.finditer(status)
       #Nabbing all urls that aren't delivered and appending it to a list to be written back into deliveres.txt file absent completed orders.
-       if combined.find("Delivered") != -1:
-         pass
+       if combined.find("Delivered") == 0:
+        pass
        else:
          outstanding.append(line)
     with open(config.file, 'w') as remaining:
